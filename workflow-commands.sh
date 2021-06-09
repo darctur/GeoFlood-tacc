@@ -35,18 +35,18 @@ python ${PATH_GEOTOOLS}/GeoNet/pygeonet_skeleton_definition.py
 python ${PATH_GEOTOOLS}/GeoFlood/Network_Node_Reading.py
 ### next edit the endPoints.csv file at "${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_endPoints.csv"
 
-# GeoFlood steps 7. Negative HAND, and 8. Network Extraction:wq
+# GeoFlood steps 7. Negative HAND, and 8. Network Extraction
 python ${PATH_GEOTOOLS}/GeoFlood/Relative_Height_Estimation.py
 python ${PATH_GEOTOOLS}/GeoFlood/Network_Extraction.py
 
 ## TauDEM step 9. pit-filling
-# mpiexec -n 66 ${TAUDEM}/pitremove -z ${PATH_GEOINPUTS}/GIS/${PROJECT}.tif -fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_fel.tif
+# mpiexec -n 66 ${PATH_TAUDEM}/pitremove -z ${PATH_GEOINPUTS}/GIS/${PROJECT}.tif -fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_fel.tif
 ibrun -np 1 singularity run ${PATH_DOCKERSIF} ${TASKPROC}/container_wrapper.sh --environment geoflood --command "pitremove -z ${PATH_GEOINPUTS}/GIS/${PROJECT}.tif -fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_fel.tif" 
 gdal_translate -a_srs $(gdalsrsinfo -e ${PATH_GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif | head -n2 | tail -n1) ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel_srs.tif 
 mv ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel_srs.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif 
 
 # TauDEM step 10. D-Infinity flow direction
-# mpiexec -n 66 ${TAUDEM}/dinfflowdir> - fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_fel.tif> -ang ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_ang.tif> -slp ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_slp.tif>
+# mpiexec -n 66 ${PATH_TAUDEM}/dinfflowdir> - fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_fel.tif> -ang ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_ang.tif> -slp ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_slp.tif>
 ibrun -np 67 singularity run ${PATH_DOCKERSIF} ${TASKPROC}/container_wrapper.sh --environment geoflood --command "dinfflowdir -ang ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif -fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif -slp ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif" 
 gdal_translate -a_srs $(gdalsrsinfo -e ${PATH_GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif | head -n2 | tail -n1) ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang_srs.tif 
 mv ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang_srs.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif 
@@ -54,7 +54,7 @@ gdal_translate -a_srs $(gdalsrsinfo -e ${PATH_GEOINPUTS}/GIS/${PROJECT}/${PROJEC
 mv ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp_srs.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif 
 
 # TauDEM step 12. HAND
-# mpiexec -n 66 ${TAUDEM}/dinfdistdown> - ang ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_ang.tif> -fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_fel.tif> -slp ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_slp.tif> -src ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_path.tif> -dd ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_hand.tif> -m ave v
+# mpiexec -n 66 ${PATH_TAUDEM}/dinfdistdown> - ang ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_ang.tif> -fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_fel.tif> -slp ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_slp.tif> -src ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_path.tif> -dd ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_hand.tif> -m ave v
 ibrun -np 67 singularity run ${PATH_DOCKERSIF} ${TASKPROC}/container_wrapper.sh --environment geoflood --command "areadinf -ang ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif -sca ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca.tif" 
 gdal_translate -a_srs $(gdalsrsinfo -e ${PATH_GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif | head -n2 | tail -n1) ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca_srs.tif 
 mv ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca_srs.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca.tif 
