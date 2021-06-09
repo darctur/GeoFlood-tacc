@@ -3,17 +3,19 @@
 #   https://github.com/dhardestylewis/GeoFlood-Task_processor/blob/main/geoflood-task_processor/workflow_commands-geoflood_singularity.sh
 
 # Set tools and project environment names
-# export PROJECT='BMT110_ColeCreek'
-# export WORKING_DIR="/work2/02044/arcturdk/stampede2/TxDOT_GeoFlood/${PROJECT}"
-export PROJECT='TX-Counties-Travis-120902050406'
-export WORKING_DIR="/work2/02044/arcturdk/stampede2/${PROJECT}"
+export WORKBASE='/work2/02044/arcturdk/stampede2/'
+export PROJECT='TX-Counties-Travis-120902050406'    ## small test dataset
+export WORKBRANCH="${WORKBASE}/GeoFlood"     ## use for test projects
+# export WORKBRANCH="${WORKBASE}/TxDOT_GeoFlood/BMT-Beaumont"
+# export PROJECT='BMT110-ColeCreek'
+export WORKING_DIR="${WORKBRANCH}/${PROJECT}"    
+export TASKPROC="${WORKBASE}/GeoFlood-taskprocessor"
+export PATH_DOCKERSIF="${WORKBASE}/geoflood_docker_latest.sif"
+export PATH_GEOTOOLS="${WORKBASE}/GeoFlood/Tools_tacc"
+export PATH_TAUDEM='/usr/local/taudem/'     ## works within Singularity shell
 export PROJECT_CFG="${WORKING_DIR}/GeoFlood_${PROJECT}.cfg"
-export TASKPROC='/work2/02044/arcturdk/stampede2/GeoFlood-taskprocessor'
-export PATH_DOCKERSIF='/work2/02044/arcturdk/stampede2/geoflood_docker_latest.sif'
-export PATH_GEOTOOLS='/work2/02044/arcturdk/stampede2/GeoFlood/Tools_tacc'
-export PATH_TAUDEM='/usr/local/taudem/'
-export PATH_GEOINPUTS="${WORKING_DIRECTORY}/GeoInputs"
-export PATH_GEOOUTPUTS="${WORKING_DIRECTORY}/GeoOutputs"
+export PATH_GEOINPUTS="${WORKING_DIR}/GeoInputs"
+export PATH_GEOOUTPUTS="${WORKING_DIR}/GeoOutputs"
 export LOCATION_NAME="${PROJECT}"
 
 ## GeoNet - Configure and prepare file structure
