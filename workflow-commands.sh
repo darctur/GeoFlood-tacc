@@ -3,7 +3,7 @@
 #   https://github.com/dhardestylewis/GeoFlood-Task_processor/blob/main/geoflood-task_processor/workflow_commands-geoflood_singularity.sh
 
 # Set tools and project environment names
-export WORKBASE='/work2/02044/arcturdk/stampede2/'
+export WORKBASE='/work2/02044/arcturdk/stampede2'
 export PROJECT='TX-Counties-Travis-120902050406'    ## small test dataset
 export WORKBRANCH="${WORKBASE}/GeoFlood"     ## use for test projects
 # export WORKBRANCH="${WORKBASE}/TxDOT_GeoFlood/BMT-Beaumont"
