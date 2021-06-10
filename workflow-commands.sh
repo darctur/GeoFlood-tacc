@@ -10,52 +10,51 @@ export WORKBRANCH="${WORKBASE}/GeoFlood"     ## use for test projects
 # export PROJECT='BMT110-ColeCreek'
 export WORKING_DIR="${WORKBRANCH}/${PROJECT}"    
 export TASKPROC="${WORKBASE}/GeoFlood-taskprocessor"
-export PATH_DOCKERSIF="${WORKBASE}/geoflood_docker_latest.sif"
-export PATH_GEOTOOLS="${WORKBASE}/GeoFlood/Tools_tacc"
-export PATH_TAUDEM='/usr/local/taudem/'     ## works within Singularity shell
+export DOCKERSIF="${WORKBASE}/geoflood_docker_latest.sif"
+export GEOTOOLS="${WORKBASE}/GeoFlood/Tools_tacc"
+export TAUDEM='/usr/local/taudem/'     ## works within Singularity shell
 export PROJECT_CFG="${WORKING_DIR}/GeoFlood_${PROJECT}.cfg"
-export PATH_GEOINPUTS="${WORKING_DIR}/GeoInputs"
-export PATH_GEOOUTPUTS="${WORKING_DIR}/GeoOutputs"
+export GEOINPUTS="${WORKING_DIR}/GeoInputs"
+export GEOOUTPUTS="${WORKING_DIR}/GeoOutputs"
 export LOCATION_NAME="${PROJECT}"
 
 ## GeoNet - Configure and prepare file structure
 # ... override default input & output folder names
-# python ${PATH_GEOTOOLS}/GeoNet/pygeonet_configure.py -dir ${WORKING_DIR} -p ${PROJECT} -n ${PROJECT} --no_chunk --input_dir Inputs --output_dir Outputs 
+# python ${GEOTOOLS}/GeoNet/pygeonet_configure.py -dir ${WORKING_DIR} -p ${PROJECT} -n ${PROJECT} --no_chunk --input_dir Inputs --output_dir Outputs 
 # ... assume the input and output folders are called GeoInputs, GeoOutputs
-python ${PATH_GEOTOOLS}/GeoNet/pygeonet_configure.py -dir ${WORKING_DIR} -p ${PROJECT} -n ${PROJECT} --no_chunk
-python ${PATH_GEOTOOLS}/GeoNet/pygeonet_prepare.py
+python ${GEOTOOLS}/GeoNet/pygeonet_configure.py -dir ${WORKING_DIR} -p ${PROJECT} -n ${PROJECT} --no_chunk
+python ${GEOTOOLS}/GeoNet/pygeonet_prepare.py
 
 # GeoNet steps 1-4. DEM smoothing, slope & curvature, GRASS GIS, flow accum & curvature skeleton
-python ${PATH_GEOTOOLS}/GeoNet/pygeonet_nonlinear_filter.py
-python ${PATH_GEOTOOLS}/GeoNet/pygeonet_slope_curvature.py
-python ${PATH_GEOTOOLS}/GeoNet/pygeonet_grass_py3.py
-python ${PATH_GEOTOOLS}/GeoNet/pygeonet_skeleton_definition.py
+python ${GEOTOOLS}/GeoNet/pygeonet_nonlinear_filter.py
+python ${GEOTOOLS}/GeoNet/pygeonet_slope_curvature.py
+python ${GEOTOOLS}/GeoNet/pygeonet_grass_py3.py
+python ${GEOTOOLS}/GeoNet/pygeonet_skeleton_definition.py
 
-## GeoFlood step 6. network node reading - make sure Catchment.shp, Flowline.shp are in ${PATH_GEOINPUTS}/GIS/${PROJECT}   
-python ${PATH_GEOTOOLS}/GeoFlood/Network_Node_Reading.py
-### next edit the endPoints.csv file at "${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_endPoints.csv"
+## GeoFlood step 6. network node reading - make sure Catchment.shp, Flowline.shp are in ${GEOINPUTS}/GIS/${PROJECT}   
+python ${GEOTOOLS}/GeoFlood/Network_Node_Reading.py
+### next edit the endPoints.csv file at "${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_endPoints.csv"
 
 # GeoFlood steps 7. Negative HAND, and 8. Network Extraction
-python ${PATH_GEOTOOLS}/GeoFlood/Relative_Height_Estimation.py
-python ${PATH_GEOTOOLS}/GeoFlood/Network_Extraction.py
+python ${GEOTOOLS}/GeoFlood/Relative_Height_Estimation.py
+python ${GEOTOOLS}/GeoFlood/Network_Extraction.py
 
 ## TauDEM step 9. pit-filling
-# mpiexec -n 66 ${PATH_TAUDEM}/pitremove -z ${PATH_GEOINPUTS}/GIS/${PROJECT}.tif -fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_fel.tif
-conda deactivate
-ibrun -np 1 singularity run ${PATH_DOCKERSIF} ${TASKPROC}/container_wrapper.sh --environment geoflood --command "pitremove -z ${PATH_GEOINPUTS}/GIS/${PROJECT}.tif -fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_fel.tif" 
-# gdal_translate -a_srs $(gdalsrsinfo -e ${PATH_GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif | head -n2 | tail -n1) ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel_srs.tif 
-# mv ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel_srs.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif 
+# mpiexec -n 66 ${TAUDEM}/pitremove -z ${GEOINPUTS}/GIS/${PROJECT}.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}_fel.tif
+ibrun -np 1 singularity run ${DOCKERSIF} ${TASKPROC}/container_wrapper.sh --environment geoflood --command "pitremove -z ${GEOINPUTS}/GIS/${PROJECT}.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}_fel.tif" 
+# gdal_translate -a_srs $(gdalsrsinfo -e ${GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif | head -n2 | tail -n1) ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel_srs.tif 
+# mv ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel_srs.tif ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif 
 
 # TauDEM step 10. D-Infinity flow direction
-# mpiexec -n 66 ${PATH_TAUDEM}/dinfflowdir> - fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_fel.tif> -ang ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_ang.tif> -slp ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_slp.tif>
-ibrun -np 67 singularity run ${PATH_DOCKERSIF} ${TASKPROC}/container_wrapper.sh --environment geoflood --command "dinfflowdir -ang ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif -fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif -slp ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif" 
-# gdal_translate -a_srs $(gdalsrsinfo -e ${PATH_GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif | head -n2 | tail -n1) ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang_srs.tif 
-# mv ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang_srs.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif 
-# gdal_translate -a_srs $(gdalsrsinfo -e ${PATH_GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif | head -n2 | tail -n1) ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp_srs.tif 
-# mv ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp_srs.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif 
+# mpiexec -n 66 ${TAUDEM}/dinfflowdir> - fel ${GEOOUTPUTS}/GIS/${PROJECT}_fel.tif> -ang ${GEOOUTPUTS}/GIS/${PROJECT}_ang.tif> -slp ${GEOOUTPUTS}/GIS/${PROJECT}_slp.tif>
+ibrun -np 67 singularity run ${DOCKERSIF} ${TASKPROC}/container_wrapper.sh --environment geoflood --command "dinfflowdir -ang ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif -slp ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif" 
+# gdal_translate -a_srs $(gdalsrsinfo -e ${GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif | head -n2 | tail -n1) ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang_srs.tif 
+# mv ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang_srs.tif ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif 
+# gdal_translate -a_srs $(gdalsrsinfo -e ${GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif | head -n2 | tail -n1) ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp_srs.tif 
+# mv ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp_srs.tif ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif 
 
 # TauDEM step 12. HAND
-# mpiexec -n 66 ${PATH_TAUDEM}/dinfdistdown> - ang ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_ang.tif> -fel ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_fel.tif> -slp ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_slp.tif> -src ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_path.tif> -dd ${PATH_GEOOUTPUTS}/GIS/${PROJECT}_hand.tif> -m ave v
-ibrun -np 67 singularity run ${PATH_DOCKERSIF} ${TASKPROC}/container_wrapper.sh --environment geoflood --command "areadinf -ang ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif -sca ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca.tif" 
-# gdal_translate -a_srs $(gdalsrsinfo -e ${PATH_GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif | head -n2 | tail -n1) ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca_srs.tif 
-# mv ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca_srs.tif ${PATH_GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca.tif 
+# mpiexec -n 66 ${TAUDEM}/dinfdistdown> - ang ${GEOOUTPUTS}/GIS/${PROJECT}_ang.tif> -fel ${GEOOUTPUTS}/GIS/${PROJECT}_fel.tif> -slp ${GEOOUTPUTS}/GIS/${PROJECT}_slp.tif> -src ${GEOOUTPUTS}/GIS/${PROJECT}_path.tif> -dd ${GEOOUTPUTS}/GIS/${PROJECT}_hand.tif> -m ave v
+ibrun -np 67 singularity run ${DOCKERSIF} ${TASKPROC}/container_wrapper.sh --environment geoflood --command "areadinf -ang ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif -sca ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca.tif" 
+# gdal_translate -a_srs $(gdalsrsinfo -e ${GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif | head -n2 | tail -n1) ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca.tif ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca_srs.tif 
+# mv ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca_srs.tif ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_sca.tif 
