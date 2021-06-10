@@ -4,7 +4,7 @@
 
 # Set tools and project environment names
 export WORKBASE='/work2/02044/arcturdk/stampede2'
-export PROJECT='TX-Counties-Travis-120902050406'    ## small test dataset
+export PROJECT='TX-Counties-Travis-120902050406'    ## HUC12 test dataset
 export WORKBRANCH="${WORKBASE}/GeoFlood"     ## use for test projects
 # export WORKBRANCH="${WORKBASE}/TxDOT_GeoFlood/BMT-Beaumont"
 # export PROJECT='BMT110-ColeCreek'
