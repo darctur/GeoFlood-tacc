@@ -26,7 +26,7 @@ python ${GEOTOOLS}/GeoNet/pygeonet_configure.py -dir ${WORKING_DIR} -p ${PROJECT
 python ${GEOTOOLS}/GeoNet/pygeonet_prepare.py
 
 # GeoNet steps 1-4. DEM smoothing, slope & curvature, GRASS GIS, flow accum & curvature skeleton
-ppython ${GEOTOOLS}/GeoNet/pygeonet_slope_curvature.py
+python ${GEOTOOLS}/GeoNet/pygeonet_slope_curvature.py
 python ${GEOTOOLS}/GeoNet/pygeonet_nonlinear_filter.py
 python ${GEOTOOLS}/GeoNet/pygeonet_grass_py3.py
 python ${GEOTOOLS}/GeoNet/pygeonet_skeleton_definition.py
