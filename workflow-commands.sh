@@ -4,13 +4,14 @@
 
 # Set tools and project environment names
 export WORKBASE='/work2/02044/arcturdk/stampede2'
-export PROJECT='TX-Counties-Travis-120902050406'    ## HUC12 test dataset
-export WORKBRANCH="${WORKBASE}/GeoFlood"     ## use for test projects
-# export WORKBRANCH="${WORKBASE}/TxDOT_GeoFlood/BMT-Beaumont"
-# export PROJECT='BMT110-ColeCreek'
+# export PROJECT='TX-Counties-Travis-120902050406'    ## HUC12 test dataset
+# export WORKBRANCH="${WORKBASE}/GeoFlood"     ## use for test projects
+export WORKBRANCH="${WORKBASE}/TxDOT_GeoFlood/BMT-Beaumont"
+export PROJECT='BMT110_ColeCreek'
 export WORKING_DIR="${WORKBRANCH}/${PROJECT}"    
 export TASKPROC="${WORKBASE}/GeoFlood-taskprocessor"
 export DOCKERSIF="${WORKBASE}/geoflood_docker_tacc.sif"
+export DOCKERTAU="${WORKBASE}/taudem_docker_minimal.sif"
 export GEOTOOLS="${WORKBASE}/GeoFlood/Tools_tacc"
 export TAUDEM='/opt/taudem/bin'     ## works within Singularity shell
 export PROJECT_CFG="${WORKING_DIR}/GeoFlood_${PROJECT}.cfg"
@@ -26,8 +27,8 @@ python ${GEOTOOLS}/GeoNet/pygeonet_configure.py -dir ${WORKING_DIR} -p ${PROJECT
 python ${GEOTOOLS}/GeoNet/pygeonet_prepare.py
 
 # GeoNet steps 1-4. DEM smoothing, slope & curvature, GRASS GIS, flow accum & curvature skeleton
-python ${GEOTOOLS}/GeoNet/pygeonet_slope_curvature.py
 python ${GEOTOOLS}/GeoNet/pygeonet_nonlinear_filter.py
+python ${GEOTOOLS}/GeoNet/pygeonet_slope_curvature.py
 python ${GEOTOOLS}/GeoNet/pygeonet_grass_py3.py
 python ${GEOTOOLS}/GeoNet/pygeonet_skeleton_definition.py
 
@@ -41,9 +42,9 @@ python ${GEOTOOLS}/GeoFlood/Network_Extraction.py
 
 module load mvapich2
 ## TauDEM step 9. pit-filling, 10. D-Infinity flow direction, and 12. HAND
-ibrun -np 1 singularity run ${DOCKERSIF} ${TAUDEM}/pitremove -z ${GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif 
-ibrun -np 67 singularity run ${DOCKERSIF} ${TAUDEM}/pitremove -z ${GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif
-ibrun -np 67 singularity run ${DOCKERSIF} ${TAUDEM}/dinfflowdir -ang ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif -slp ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif 
-ibrun -np 67 singularity run ${DOCKERSIF} ${TAUDEM}/dinfdistdown -ang ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif -slp ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif -src ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_path.tif -dd ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_hand.tif -m ave v 
+# ibrun -np 1 singularity run ${DOCKERTAU} ${TAUDEM}/pitremove -z ${GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif 
+ibrun -np 67 singularity run ${DOCKERTAU} ${TAUDEM}/pitremove -z ${GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif
+ibrun -np 67 singularity run ${DOCKERTAU} ${TAUDEM}/dinfflowdir -ang ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif -slp ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif 
+ibrun -np 67 singularity run ${DOCKERTAU} ${TAUDEM}/dinfdistdown -ang ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif -slp ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif -src ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_path.tif -dd ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_hand.tif -m ave v 
 
 #### fine
