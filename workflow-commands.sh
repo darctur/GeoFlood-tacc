@@ -31,21 +31,12 @@ python ${GEOTOOLS}/GeoNet/pygeonet_nonlinear_filter.py
 python ${GEOTOOLS}/GeoNet/pygeonet_slope_curvature.py
 
 # GeoNet step 3. GRASS GIS
-# There are five major modules that are included with the GDAL Python bindings:
-from osgeo import gdal
-from osgeo import ogr
-from osgeo import osr
-from osgeo import gdal_array
-from osgeo import gdalconst
-# Additionally, there are five compatibility modules that are included but provide notices to state that they are deprecated and will be going away. 
-# If you are using GDAL 1.7 bindings, you should update your imports to utilize the usage above, but the following will work until GDAL 3.1.
-import gdal
-import ogr
-import osr
-import gdalnumeric
-import gdalconst
-# 
+# This needs to run in its own conda env
+conda deactivate geoflood
+conda activate grass
 python ${GEOTOOLS}/GeoNet/pygeonet_grass_py3.py
+conda deactivate grass
+conda activate geoflood
 
 # GeoNet step 4. Flow accum & curvature skeleton
 python ${GEOTOOLS}/GeoNet/pygeonet_skeleton_definition.py
@@ -58,8 +49,9 @@ python ${GEOTOOLS}/GeoFlood/Network_Node_Reading.py
 python ${GEOTOOLS}/GeoFlood/Relative_Height_Estimation.py
 python ${GEOTOOLS}/GeoFlood/Network_Extraction.py
 
-module load mvapich2
 ## TauDEM step 9. pit-filling, 10. D-Infinity flow direction, and 12. HAND
+# exit singularity container
+module load mvapich2
 # ibrun -np 1 singularity run ${DOCKERTAU} ${TAUDEM}/pitremove -z ${GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif 
 ibrun -np 67 singularity run ${DOCKERTAU} ${TAUDEM}/pitremove -z ${GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif
 ibrun -np 67 singularity run ${DOCKERTAU} ${TAUDEM}/dinfflowdir -ang ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_ang.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif -slp ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_slp.tif 
