@@ -26,10 +26,28 @@ export LOCATION_NAME="${PROJECT}"
 python ${GEOTOOLS}/GeoNet/pygeonet_configure.py -dir ${WORKING_DIR} -p ${PROJECT} -n ${PROJECT} --no_chunk
 python ${GEOTOOLS}/GeoNet/pygeonet_prepare.py
 
-# GeoNet steps 1-4. DEM smoothing, slope & curvature, GRASS GIS, flow accum & curvature skeleton
+# GeoNet steps 1-2. DEM smoothing, slope & curvature
 python ${GEOTOOLS}/GeoNet/pygeonet_nonlinear_filter.py
 python ${GEOTOOLS}/GeoNet/pygeonet_slope_curvature.py
+
+# GeoNet step 3. GRASS GIS
+# There are five major modules that are included with the GDAL Python bindings:
+from osgeo import gdal
+from osgeo import ogr
+from osgeo import osr
+from osgeo import gdal_array
+from osgeo import gdalconst
+# Additionally, there are five compatibility modules that are included but provide notices to state that they are deprecated and will be going away. 
+# If you are using GDAL 1.7 bindings, you should update your imports to utilize the usage above, but the following will work until GDAL 3.1.
+import gdal
+import ogr
+import osr
+import gdalnumeric
+import gdalconst
+# 
 python ${GEOTOOLS}/GeoNet/pygeonet_grass_py3.py
+
+# GeoNet step 4. Flow accum & curvature skeleton
 python ${GEOTOOLS}/GeoNet/pygeonet_skeleton_definition.py
 
 ## GeoFlood step 6. network node reading - make sure Catchment.shp, Flowline.shp are in ${GEOINPUTS}/GIS/${PROJECT}   
