@@ -31,7 +31,9 @@ export PROJECT_CFG="${WORKING_DIR}/GeoFlood_${PROJECT}.cfg"
 export GEOINPUTS="${WORKING_DIR}/GeoInputs"
 export GEOOUTPUTS="${WORKING_DIR}/GeoOutputs"
 export LOCATION_NAME="${PROJECT}"
-
+export GDAL_DATA="${WORKBASE}/anaconda3/envs/geoflood/share"
+export PROJ_LIB="${WORKBASE}/anaconda3/envs/geoflood/share/proj"
+ 
 # make sure conda env is set to geoflood except for grass step
 conda activate geoflood
 
@@ -44,7 +46,7 @@ python ${GEOTOOLS}/GeoNet/pygeonet_prepare.py
 
 # GeoNet steps 1-2. DEM smoothing, slope & curvature
 python ${GEOTOOLS}/GeoNet/pygeonet_nonlinear_filter.py
-python ${GEOTOOLS}/GeoNet/pygeonet_slope_curvature.
+python ${GEOTOOLS}/GeoNet/pygeonet_slope_curvature.py
 
 # GeoNet step 3. GRASS GIS
 # This needs to run in its own conda env, first deactivate geoflood
@@ -67,7 +69,7 @@ python ${GEOTOOLS}/GeoFlood/Relative_Height_Estimation.py
 python ${GEOTOOLS}/GeoFlood/Network_Extraction.py
 
 ## TauDEM step 9. pit-filling, 10. D-Infinity flow direction, and 12. HAND
-# exit singularity container
+# exit singularity container, then rerun the export commands above
 module load mvapich2
 # ibrun -np 1 singularity run ${DOCKERTAU} ${TAUDEM}/pitremove -z ${GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif 
 ibrun -np 67 singularity run ${DOCKERTAU} ${TAUDEM}/pitremove -z ${GEOINPUTS}/GIS/${PROJECT}/${PROJECT}.tif -fel ${GEOOUTPUTS}/GIS/${PROJECT}/${PROJECT}_fel.tif
