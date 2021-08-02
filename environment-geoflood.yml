@@ -1,0 +1,21 @@
+name: geoflood
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python
+  - setuptools
+  - gdal
+  - pip
+  - numpy
+  - rtree
+  - numba
+  - pandas
+  - geopandas
+  - tqdm
+  - richdem
+  - rasterio
+  - rasterstats
+  - statsmodels
+  - psutil
+  - scikit-image
