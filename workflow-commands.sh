@@ -3,11 +3,11 @@
 #   https://github.com/dhardestylewis/GeoFlood-Task_processor/blob/main/geoflood-task_processor/workflow_commands-geoflood_singularity.sh
 
 # start idev node and singularity support
-idev -N 1 -n 67 -t 2:00:00 -p development 	
+idev -N 1 -n 67 -t 2:00:00 -p development -A PT2050-DataX	
 module load tacc-singularity
  
 ## if needed, first remove then rebuild geoflood_docker_tacc.sif (or taudem) image in ${WORK2}
-cdw2
+cdw
 singularity pull --disable-cache docker://dhardestylewis/geoflood_docker:tacc	
 singularity pull --disable-cache docker://dhardestylewis/taudem_docker:minimal   
 
@@ -16,7 +16,7 @@ singularity shell ./geoflood_docker_tacc.sif
 eval "$(conda shell.bash hook)"
 
 # Set tools and project environment names
-export WORKBASE='/work2/02044/arcturdk/stampede2'
+export WORKBASE='/work/02044/arcturdk/stampede2'
 # export PROJECT='TX-Counties-Travis-120902050406'    ## HUC12 test dataset
 # export WORKBRANCH="${WORKBASE}/GeoFlood"     ## use for test projects
 export WORKBRANCH="${WORKBASE}/TxDOT_GeoFlood/BMT-Beaumont"
@@ -52,7 +52,7 @@ python ${GEOTOOLS}/GeoNet/pygeonet_slope_curvature.py
 # This needs to run in its own conda env, first deactivate geoflood
 conda deactivate 
 conda activate grass
-  python ${GEOTOOLS}/GeoNet/pygeonet_grass_py3.py
+python ${GEOTOOLS}/GeoNet/pygeonet_grass_py3.py
 conda deactivate 
 conda activate geoflood
 
